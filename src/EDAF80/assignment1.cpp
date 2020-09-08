@@ -6,6 +6,7 @@
 #include "core/helpers.hpp"
 #include "core/node.hpp"
 #include "core/ShaderProgramManager.hpp"
+#include "CelestialBody.hpp"
 
 #include <imgui.h>
 
@@ -153,10 +154,11 @@ int main()
 	//
 	// Set up the sun node and other related attributes
 	//
-	Node sun;
-	sun.set_geometry(sphere);
-	sun.set_program(&celestial_body_shader);
-	sun.add_texture("diffuse_texture", sun_texture, GL_TEXTURE_2D);
+	// Node sun;
+	// sun.set_geometry(sphere);
+	// sun.set_program(&celestial_body_shader);
+	// sun.add_texture("diffuse_texture", sun_texture, GL_TEXTURE_2D);
+	CelestialBody* sun = new CelestialBody(sphere, &celestial_body_shader, sun_texture);
 
 
 	glClearDepthf(1.0f);
@@ -239,8 +241,13 @@ int main()
 		//
 		// TODO: Replace this explicit rendering of the Sun with a
 		// traversal of the scene graph and rendering of all its nodes.
-		sun.render(camera.GetWorldToClipMatrix());
+		//sun.render(camera.GetWorldToClipMatrix());
 
+		auto const scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		SpinConfiguration config = {glm::radians(45.0f), 0.0f};
+		sun->set_scale(scale);
+		sun->set_spin(sun_spin);
+		sun->render(animation_delta_time_us, camera.GetWorldToClipMatrix());
 
 		//
 		// Display Dear ImGui windows
