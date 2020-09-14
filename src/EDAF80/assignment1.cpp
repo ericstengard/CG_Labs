@@ -245,8 +245,13 @@ int main()
 
 		auto const scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		SpinConfiguration config = {glm::radians(45.0f), 0.0f};
+		OrbitConfiguration orbitConfig = {2.0f, glm::radians(-20.0f), 0.0f};
+		bonobo::mesh_data circle = parametric_shapes::createCircleRing(1.6f, 0.8f, 80u, 8u);
+
 		sun->set_scale(scale);
 		sun->set_spin(sun_spin);
+		sun->set_orbit(orbitConfig);
+		sun->set_ring(circle, &celestial_ring_shader, saturn_ring_texture);
 		sun->render(animation_delta_time_us, camera.GetWorldToClipMatrix());
 
 		//
