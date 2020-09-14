@@ -41,8 +41,13 @@ glm::mat4 CelestialBody::render(  std::chrono::microseconds ellapsed_time,
 
     glm::mat4 ring = glm::rotate(result_matrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    _ring.render(view_projection, ring);
-    return result_matrix;
+    glm::vec3 ring_scale_vector = glm::vec3(_ring_scale, 1.0f);
+    glm::mat4 ring_scale_matrix = glm::scale(glm::mat4(1.0f), ring_scale_vector);
+
+    glm::mat4 ring_res = ring * ring_scale_matrix;
+
+    _ring.render(view_projection, ring_res);
+    return parent_transform * result_matrix;
 }
 
 void CelestialBody::set_scale(glm::vec3 const& scale)
