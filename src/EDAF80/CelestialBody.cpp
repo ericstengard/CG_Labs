@@ -37,17 +37,19 @@ glm::mat4 CelestialBody::render(  std::chrono::microseconds ellapsed_time,
 
     auto result_matrix = tilted_orbit_matrix * planet_matrix;
 
-    _body.render(view_projection, result_matrix);
+    auto res_parent_matrix = parent_transform * result_matrix ;
+
+    _body.render(view_projection, res_parent_matrix);
 
     glm::mat4 ring = glm::rotate(result_matrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glm::vec3 ring_scale_vector = glm::vec3(_ring_scale, 1.0f);
     glm::mat4 ring_scale_matrix = glm::scale(glm::mat4(1.0f), ring_scale_vector);
 
-    glm::mat4 ring_res = ring * ring_scale_matrix;
+    glm::mat4 ring_res = parent_transform * ring * ring_scale_matrix;
 
     _ring.render(view_projection, ring_res);
-    return parent_transform * result_matrix;
+    return parent_transform * tilted_orbit_matrix;
 }
 
 void CelestialBody::set_scale(glm::vec3 const& scale)
@@ -72,4 +74,14 @@ void CelestialBody::set_ring(bonobo::mesh_data const& shape, GLuint const* progr
     _ring.set_program(program);
     _ring.add_texture("diffuse_texture", diffuse_texture_id, GL_TEXTURE_2D);
     _ring_scale = scale;
+}
+
+void CelestialBody::add_child(CelestialBody* child)
+{
+    _children.push_back(child);
+}
+
+std::vector<CelestialBody*> const& CelestialBody::get_children()
+{
+    return this->_children;
 }
