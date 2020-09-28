@@ -103,7 +103,7 @@ edaf80::Assignment2::run()
 
 	// Set the default tensions value; it can always be changed at runtime
 	// through the "Scene Controls" window.
-	float catmull_rom_tension = 0.0f;
+	float catmull_rom_tension = 0.5f;
 
 	// Set whether the default interpolation algorithm should be the linear one;
 	// it can always be changed at runtime through the "Scene Controls" window.
@@ -120,16 +120,19 @@ edaf80::Assignment2::run()
 
 
 	//! \todo Create a tesselated sphere and a tesselated torus
-
+	auto const anim_shape = parametric_shapes::createSphere(0.2f, 100u, 100u);
+	Node anim_sphere_node = Node();
+	anim_sphere_node.set_geometry(anim_shape);
+	anim_sphere_node.set_program(&normal_shader, set_uniforms);
 
 	glClearDepthf(1.0f);
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable face culling to improve performance
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
-	//glCullFace(GL_BACK);
+	// glEnable(GL_CULL_FACE);
+	// glCullFace(GL_FRONT);
+	// glCullFace(GL_BACK);
 
 
 
@@ -161,6 +164,11 @@ edaf80::Assignment2::run()
 	auto polygon_mode = bonobo::polygon_mode_t::fill;
 	bool show_logs = true;
 	bool show_gui = true;
+
+	int interpol_index = 1;
+	float x = 0.0f;
+	glm::vec3 anim_pos = control_point_locations[0];
+	int cp_size = control_point_locations.size();
 
 	while (!glfwWindowShouldClose(window)) {
 		auto const nowTime = std::chrono::high_resolution_clock::now();
@@ -204,19 +212,41 @@ edaf80::Assignment2::run()
 		if (interpolate) {
 			//! \todo Interpolate the movement of a shape between various
 			//!        control points.
+			glm::vec3 p0 = control_point_locations[(interpol_index-1) % cp_size];
+			glm::vec3 p1 = control_point_locations[(interpol_index) % cp_size];
+			glm::vec3 p2 = control_point_locations[(interpol_index+1) % cp_size];
+			glm::vec3 p3 = control_point_locations[(interpol_index+2) % cp_size];
+
+			// x += ellapsed_time_s;
+			// ellapsed_time_s = 0.0f;
+			x += 0.01;
+
 			if (use_linear) {
 				//! \todo Compute the interpolated position
 				//!       using the linear interpolation.
+
+				anim_pos = interpolation::evalLERP(p1, p2, x);
 			}
 			else {
 				//! \todo Compute the interpolated position
 				//!       using the Catmull-Rom interpolation;
 				//!       use the `catmull_rom_tension`
 				//!       variable as your tension argument.
+				anim_pos = interpolation::evalCatmullRom(p0, p1, p2, p3, catmull_rom_tension, x);
 			}
+
+			anim_sphere_node.get_transform().SetTranslate(anim_pos);
+			anim_sphere_node.render(mCamera.GetWorldToClipMatrix());
+
+			if(x >= 1){
+				interpol_index +=1;
+				x = 0;
+			}	
 		}
 
 		circle_rings.render(mCamera.GetWorldToClipMatrix());
+
+
 		for (auto const& control_point : control_points) {
 			control_point.render(mCamera.GetWorldToClipMatrix());
 		}
@@ -227,6 +257,13 @@ edaf80::Assignment2::run()
 			auto selection_result = program_manager.SelectProgram("Shader", program_index);
 			if (selection_result.was_selection_changed) {
 				circle_rings.set_program(selection_result.program, set_uniforms);
+				anim_sphere_node.set_program(selection_result.program, set_uniforms);
+
+				for (std::size_t i = 0; i < control_point_locations.size(); ++i) {
+					auto& control_point = control_points[i];
+					control_point.set_program(selection_result.program, set_uniforms);
+				}
+
 			}
 			ImGui::Separator();
 			ImGui::Checkbox("Enable interpolation", &interpolate);
