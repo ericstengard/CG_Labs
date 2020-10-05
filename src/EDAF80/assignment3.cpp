@@ -75,6 +75,30 @@ edaf80::Assignment3::run()
 	if (texcoord_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
+	GLuint cube_map = 0u;
+	program_manager.CreateAndRegisterProgram("Skybox",
+	                                         { { ShaderType::vertex, "EDAF80/cube_map.vert" },
+	                                           { ShaderType::fragment, "EDAF80/cube_map.frag" } },
+	                                         cube_map);
+	if (cube_map == 0u)
+		LogError("Failed to load texcoord shader");
+
+	GLuint phong_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Phong Shader",
+	                                         { { ShaderType::vertex, "EDAF80/phong.vert" },
+	                                           { ShaderType::fragment, "EDAF80/phong.frag" } },
+	                                         phong_shader);
+	if (phong_shader == 0u)
+		LogError("Failed to load texcoord shader");
+
+	// GLuint normal_map_shader = 0u;
+	// program_manager.CreateAndRegisterProgram("Normal Map Shader",
+	//                                          { { ShaderType::vertex, "EDAF80/normal_map.vert" },
+	//                                            { ShaderType::fragment, "EDAF80/normal_map.frag" } },
+	//                                          normal_map_shader);
+	// if (normal_map_shader == 0u)
+	// 	LogError("Failed to load texcoord shader");
+
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
@@ -108,7 +132,16 @@ edaf80::Assignment3::run()
 
 	Node skybox;
 	skybox.set_geometry(skybox_shape);
-	skybox.set_program(&fallback_shader, set_uniforms);
+	skybox.set_program(&cube_map, set_uniforms);
+	GLuint const sky_texture = bonobo::loadTextureCubeMap(
+														config::resources_path("cubemaps/LarnacaCastle/posx.jpg"),
+														config::resources_path("cubemaps/LarnacaCastle/negx.jpg"),
+														config::resources_path("cubemaps/LarnacaCastle/posy.jpg"),
+														config::resources_path("cubemaps/LarnacaCastle/negy.jpg"),
+														config::resources_path("cubemaps/LarnacaCastle/posz.jpg"),
+														config::resources_path("cubemaps/LarnacaCastle/negz.jpg")
+														);
+	skybox.add_texture("skybox_texture", sky_texture, GL_TEXTURE_CUBE_MAP);
 
 	auto demo_shape = parametric_shapes::createSphere(1.5f, 40u, 40u);
 	if (demo_shape.vao == 0u) {
@@ -118,7 +151,14 @@ edaf80::Assignment3::run()
 
 	Node demo_sphere;
 	demo_sphere.set_geometry(demo_shape);
+	// demo_sphere.set_program(&fallback_shader, set_uniforms);
 	demo_sphere.set_program(&fallback_shader, set_uniforms);
+	demo_sphere.add_texture("skybox_texture", sky_texture, GL_TEXTURE_CUBE_MAP);
+
+	auto my_normal_map_id = bonobo::loadTexture2D(config::resources_path("textures/cobblestone_floor_08_nor_2k.jpg"));
+	demo_sphere.add_texture("normal_map", my_normal_map_id, GL_TEXTURE_2D);
+	auto my_diffuse_map_id = bonobo::loadTexture2D(config::resources_path("textures/cobblestone_floor_08_diff_2k.jpg"));
+	demo_sphere.add_texture("diffuse_map", my_diffuse_map_id, GL_TEXTURE_2D);
 
 
 	glClearDepthf(1.0f);

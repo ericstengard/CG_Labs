@@ -174,8 +174,8 @@ parametric_shapes::createSphere(float const radius,
 			                            radius * cos_theta * sin_phi);
 
 			// texture coordinates
-			texcoords[index] = glm::vec3(static_cast<float>(j) / (static_cast<float>(latitude_vertices_count)),
-			                             static_cast<float>(i) / (static_cast<float>(longitude_vertices_count)),
+			texcoords[index] = glm::vec3(static_cast<float>(i) / (static_cast<float>(longitude_vertices_count-1)),
+										static_cast<float>(j) / (static_cast<float>(latitude_vertices_count-1)),
 			                             0.0f);
 
 			// tangent
