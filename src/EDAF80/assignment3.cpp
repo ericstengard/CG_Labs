@@ -91,13 +91,6 @@ edaf80::Assignment3::run()
 	if (phong_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
-	// GLuint normal_map_shader = 0u;
-	// program_manager.CreateAndRegisterProgram("Normal Map Shader",
-	//                                          { { ShaderType::vertex, "EDAF80/normal_map.vert" },
-	//                                            { ShaderType::fragment, "EDAF80/normal_map.frag" } },
-	//                                          normal_map_shader);
-	// if (normal_map_shader == 0u)
-	// 	LogError("Failed to load texcoord shader");
 
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){

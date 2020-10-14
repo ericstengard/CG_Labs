@@ -84,8 +84,10 @@ target_sources (
 	PRIVATE
 		[[assignment5.hpp]]
 		[[assignment5.cpp]]
+		[[CelestialBody.cpp]]
+		[[CelestialBody.hpp]]
 )
-target_link_libraries (EDAF80_Assignment5 PRIVATE assignment_setup)
+target_link_libraries (EDAF80_Assignment5 PRIVATE assignment_setup parametric_shapes)
 copy_dlls (EDAF80_Assignment5 "${CMAKE_CURRENT_BINARY_DIR}")
 
 
